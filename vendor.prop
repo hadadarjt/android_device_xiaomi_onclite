@@ -35,6 +35,7 @@ ro.crypto.volume.contents_mode=ice
 ro.crypto.volume.filenames_mode=aes-256-cts
 
 # Display post-processing
+ro.surface_flinger.enable_frame_rate_override=false
 ro.vendor.display.cabl=0
 ro.vendor.display.sensortype=2
 

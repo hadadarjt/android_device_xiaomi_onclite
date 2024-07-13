@@ -88,15 +88,12 @@ PRODUCT_PACKAGES += \
     android.hardware.graphics.allocator@2.0-service \
     android.hardware.graphics.composer@2.1-service \
     android.hardware.graphics.mapper@2.0-impl-2.1 \
-    android.hardware.memtrack@1.0-impl \
-    android.hardware.memtrack@1.0-service \
     gralloc.msm8953 \
     hwcomposer.msm8953 \
     libdisplayconfig \
     libqdMetaData \
     libqdMetaData.system \
     libtinyxml \
-    memtrack.msm8953 \
     vendor.display.config@1.9
 
 # Doze mode
@@ -223,6 +220,10 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_PACKAGES += \
     libavservices_minijail.vendor
+
+# Memory Tracker
+PRODUCT_PACKAGES += \
+    vendor.qti.hardware.memtrack-service
 
 # Netutils
 PRODUCT_PACKAGES += \

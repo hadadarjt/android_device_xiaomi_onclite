@@ -1,15 +1,17 @@
 #!/bin/bash
 #
-# Copyright (C) 2016 The CyanogenMod Project
-# Copyright (C) 2017-2020 The LineageOS Project
-#
+# SPDX-FileCopyrightText: 2016 The CyanogenMod Project
+# SPDX-FileCopyrightText: 2017-2024 The LineageOS Project
 # SPDX-License-Identifier: Apache-2.0
 #
 
 set -e
 
-DEVICE=onclite
-VENDOR=xiaomi
+# Required!
+export DEVICE=onclite
+export VENDOR=xiaomi
+
+export DEVICE_BRINGUP_YEAR=2019
 
 # Load extract_utils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"
@@ -27,8 +29,8 @@ source "${HELPER}"
 # Default to sanitizing the vendor folder before extraction
 CLEAN_VENDOR=true
 
-KANG=
 SECTION=
+KANG=
 
 while [ "${#}" -gt 0 ]; do
     case "${1}" in
@@ -39,7 +41,8 @@ while [ "${#}" -gt 0 ]; do
                 KANG="--kang"
                 ;;
         -s | --section )
-                SECTION="${2}"; shift
+                SECTION="${2}"
+                shift
                 CLEAN_VENDOR=false
                 ;;
         * )
@@ -56,20 +59,31 @@ fi
 function blob_fixup() {
     case "${1}" in
     vendor/lib/hw/camera.msm8953.so)
-        "${PATCHELF}" --add-needed libui_shim.so "${2}"
+        [ "$2" = "" ] && return 0
+        grep -q "libui_shim.so" "${2}" || "${PATCHELF}" --add-needed "libui_shim.so" "${2}"
         ;;
     vendor/lib/lib_lowlight.so)
+        [ "$2" = "" ] && return 0
         "${PATCHELF}" --replace-needed "libstdc++.so" "libstdc++_vendor.so" "${2}"
         ;;
     vendor/lib64/hw/fingerprint.goodix.default.so | vendor/lib64/libvendor.goodix.hardware.fingerprint@1.0-service.so)
+        [ "$2" = "" ] && return 0
         "${PATCHELF_0_17_2}" --replace-needed "libvendor.goodix.hardware.fingerprint@1.0.so" "vendor.goodix.hardware.fingerprint@1.0.so" "${2}"
         ;;
+        *)
+            return 1
+            ;;
     esac
+    return 0
 }
 
-# Initialize the helper
+function blob_fixup_dry() {
+    blob_fixup "$1" ""
+}
+
 setup_vendor "${DEVICE}" "${VENDOR}" "${ANDROID_ROOT}" false "${CLEAN_VENDOR}"
 
-extract "${MY_DIR}/proprietary-files.txt" "${SRC}" "${KANG}" --section "${SECTION}"
+extract "${MY_DIR}/proprietary-files.txt" "${SRC}" \
+        "${KANG}" --section "${SECTION}"
 
 "${MY_DIR}/setup-makefiles.sh"
